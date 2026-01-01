@@ -489,7 +489,7 @@ function confirmTrans(){
 }
 
 function addPlayer(){
-  const n = prompt("ناڤێ یاریزانی بنڤیسە (Name):");
+  const n = prompt("ناڤێ یاریزانی بنڤیسە:");
   if(!n) return;
   state.players.push({ id: 'p'+Date.now(), name: n, balance: 1500 });
   save();
