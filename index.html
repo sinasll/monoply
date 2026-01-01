@@ -374,7 +374,7 @@ function renderPlayers(){
     const bankrupt = (p.balance <= 0);
     const actionsHtml = bankrupt ? '' : `
       <div class="card-actions">
-        <button class="btn-act btn-get" onclick="openSheet('${p.id}','get')">وەردگریت</button>
+        <button class="btn-act btn-get" onclick="openSheet('${p.id}','get')">وەرگرتن</button>
         <button class="btn-act btn-send" onclick="openSheet('${p.id}','send')">فرێکرن</button>
         <div class="icon-row">
             <button class="icon-btn" title="گۆڕین" onclick="renamePlayer('${p.id}')">
