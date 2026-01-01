@@ -12,13 +12,14 @@
 <style>
 :root{
   --bg-dark:#0f172a; --felt-green:#064e3b; --gold:#d4af37;
-  --card-bg:#ffffff; --text-dark:#1e293b; --danger:#e11d48;
+  --card-bg:#fdfcf5; 
+  --text-dark:#1e293b; --danger:#e11d48;
   --success:#10b981; --font:'Noto Sans Arabic',sans-serif;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;outline:none}
 body{background:var(--bg-dark);font-family:var(--font);height:100vh;display:flex;flex-direction:column;overflow:hidden;color:white}
 
-/* simple header (only the requested text) */
+/* Header */
 .site-header{
   padding:14px 12px;
   padding-top: max(14px, env(safe-area-inset-top));
@@ -37,59 +38,47 @@ body{background:var(--bg-dark);font-family:var(--font);height:100vh;display:flex
   text-shadow: 0 2px 8px rgba(0,0,0,0.6);
 }
 
-/* main */
+/* Main Area */
 main{flex:1;padding:15px;padding-bottom:100px;background:radial-gradient(circle at center,#14532d 0%,#0f172a 100%)}
 
-/* --- NEW GRID SYSTEM --- */
+/* Player Grid */
 .player-list{
   display:grid;
-  grid-template-columns: repeat(2, 1fr); /* Mobile: 2 per row */
+  grid-template-columns: repeat(2, 1fr);
   gap:10px;
   max-width:1200px;
   margin:0 auto;
   max-height: calc(100vh - 220px);
   height: auto;
   overflow-y:auto;
-  -webkit-overflow-scrolling: touch; /* smooth on iOS */
-  -ms-overflow-style: auto; /* IE/Edge */
+  -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable;
   padding-right:4px;
   padding-left:4px;
 }
-
-/* Scrollbar styles for modern browsers */
 .player-list::-webkit-scrollbar{ width:10px; height:10px }
 .player-list::-webkit-scrollbar-thumb{ background: linear-gradient(#334155,#0b1220); border-radius:8px }
 .player-list{ scrollbar-width: thin; scrollbar-color: #334155 transparent }
+@media(min-width: 600px){ .player-list{ grid-template-columns: repeat(3, 1fr); max-height: calc(100vh - 230px); } }
+@media(min-width: 900px){ .player-list{ grid-template-columns: repeat(6, 1fr); max-height: calc(100vh - 240px); } }
 
-/* Responsive Breakpoints for Grid */
-@media(min-width: 600px){
-  .player-list{ grid-template-columns: repeat(3, 1fr); max-height: calc(100vh - 230px); }
-}
-@media(min-width: 900px){
-  .player-list{ grid-template-columns: repeat(6, 1fr); max-height: calc(100vh - 240px); }
-}
-
-/* card - Redesigned for Grid */
+/* Cards */
 .player-card{
   background:var(--card-bg);
   border-radius:12px;
   display:flex;
-  flex-direction: column; /* Vertical stack */
+  flex-direction: column;
   align-items:center;
   justify-content: space-between;
   padding:15px 10px;
   position:relative;
   box-shadow:0 6px 18px rgba(2,6,23,0.45);
-  border-bottom:6px solid var(--gold); /* Border at bottom now */
-  border-right: none;
+  border-bottom:6px solid var(--gold);
   transition:transform 200ms ease, filter 200ms;
   overflow:hidden;
   height: 100%;
   min-height: 160px;
 }
-
-/* --- BANKRUPT STYLES --- */
 .player-card.bankrupt {
   filter: grayscale(100%) contrast(120%);
   opacity: 0.8;
@@ -97,112 +86,53 @@ main{flex:1;padding:15px;padding-bottom:100px;background:radial-gradient(circle 
   background: #cbd5e1;
   border-color: #475569;
 }
-
 .bankrupt-lock {
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(0, 0, 0, 0.05),
-    rgba(0, 0, 0, 0.05) 10px,
-    rgba(0, 0, 0, 0.15) 10px,
-    rgba(0, 0, 0, 0.15) 20px
-  );
-  z-index: 5;
-  pointer-events: none;
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg,rgba(0,0,0,0.05),rgba(0,0,0,0.05) 10px,rgba(0,0,0,0.15) 10px,rgba(0,0,0,0.15) 20px);
+  z-index: 5; pointer-events: none;
 }
-
 .bankrupt-badge {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-15deg);
-  border: 4px solid var(--danger);
-  color: var(--danger);
-  font-size: 1.2rem;
-  font-weight: 900;
-  padding: 4px 12px;
-  border-radius: 8px;
-  text-transform: uppercase;
-  z-index: 10;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
+  border: 4px solid var(--danger); color: var(--danger); font-size: 1.2rem; font-weight: 900;
+  padding: 4px 12px; border-radius: 8px; text-transform: uppercase; z-index: 10;
+  background: rgba(255, 255, 255, 0.9); box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
-
 .bankrupt-anim .bankrupt-badge { animation: stamp-slam 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 .bankrupt-anim { animation: shake-death 0.5s ease-in-out forwards; }
 @keyframes stamp-slam { 0% { transform: translate(-50%, -50%) scale(3) rotate(0deg); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 1; } }
 @keyframes shake-death { 0% { transform: translateX(0); } 25% { transform: translateX(-6px) rotate(-1deg); } 50% { transform: translateX(6px) rotate(1deg); } 75% { transform: translateX(-4px); } 100% { transform: translateX(0); filter: grayscale(100%); } }
 
-/* info */
-.player-info{
-  flex:1;
-  min-width:0;
-  padding-left:0;
-  text-align: center;
-  margin-bottom: 10px;
-  width: 100%;
-}
+.player-info{ flex:1; min-width:0; padding-left:0; text-align: center; margin-bottom: 10px; width: 100%; }
 .player-name{color:var(--text-dark);font-weight:800;font-size:1rem;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .player-balance{color:#334155;font-family:monospace;font-weight:900;font-size:1.4rem;letter-spacing:-0.5px}
 
-/* --- COMPACT BUTTONS GRID --- */
-.card-actions{
-  display:flex;
-  flex-wrap: wrap;
-  gap:6px;
-  width: 100%;
-  justify-content:center;
-  margin-right: 0;
-}
-
+.card-actions{ display:flex; flex-wrap: wrap; gap:6px; width: 100%; justify-content:center; margin-right: 0; }
 .btn-act {
-  border: none;
-  border-radius: 6px;
-  padding: 8px 0;
-  width: 48%;
-  font-family: var(--font);
-  font-weight: 800;
-  font-size: 0.75rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 100ms;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  border: none; border-radius: 6px; padding: 8px 0; width: 48%;
+  font-family: var(--font); font-weight: 800; font-size: 0.75rem; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: transform 100ms; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 .btn-send{background:#fee2e2;color:#be123c;}
 .btn-get{background:#dcfce7;color:#15803d;}
 .btn-act:active{transform:scale(0.95)}
-
-.icon-row {
-  display: flex;
-  gap: 6px;
-  width: 100%;
-  justify-content: center;
-  margin-top: 4px;
-}
+.icon-row { display: flex; gap: 6px; width: 100%; justify-content: center; margin-top: 4px; }
 .icon-btn{background:transparent;border:none;padding:0;border-radius:6px;cursor:pointer;color:#94a3b8;display:inline-flex;align-items:center;justify-content:center; width:32px;height:32px; transition:background 0.2s}
 .icon-btn:hover{background:rgba(0,0,0,0.06); color:var(--text-dark)}
 .icon-btn svg{width:18px;height:18px;display:block}
 
-/* money dots (kept) */
-.money-burst{position:fixed;width:10px;height:10px;border-radius:50%;background:rgba(212,175,55,0.95);pointer-events:none;z-index:6000;will-change:transform,opacity}
-
-/* nav */
+/* Navigation */
 nav{position:fixed;bottom:0;width:100%;background:#1e293b;display:flex;justify-content:space-around;align-items:center;padding:10px 0;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid #334155;z-index:100}
 .nav-item{background:none;border:none;color:#94a3b8;font-family:var(--font);font-size:0.8rem;display:flex;gap:6px;flex-direction:column;align-items:center}
 .add-circle{width:56px;height:56px;background:var(--gold);border-radius:50%;display:grid;place-items:center;font-size:28px;color:black;border:4px solid #1e293b;transform:translateY(-20px);box-shadow:0 6px 20px rgba(0,0,0,0.45)}
 
-/* sheet */
+/* Sheets/Modals */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:280ms;z-index:1000;backdrop-filter:blur(2px)}
 .overlay.open{opacity:1;pointer-events:auto}
 .sheet{background:white;width:100%;max-width:500px;margin:0 auto;border-radius:24px 24px 0 0;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:320ms cubic-bezier(.17,.84,.44,1);color:var(--text-dark)}
 .overlay.open .sheet{transform:translateY(0)}
 .sheet-title{font-weight:900;margin-bottom:12px;text-align:center;color:#000;font-size:1.05rem}
 .inp-amt{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:12px;font-size:1.6rem;text-align:center;font-weight:900;margin-bottom:12px;font-family:monospace}
-
-/* reasons/chips */
 .reason-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
 .reason-btn{background:#f1f5f9;padding:10px;border-radius:10px;text-align:center;font-size:0.8rem;font-weight:800;border:2px solid transparent;cursor:pointer}
 .reason-btn.selected{background:#fef3c7;border-color:var(--gold);color:#92400e}
@@ -211,47 +141,110 @@ nav{position:fixed;bottom:0;width:100%;background:#1e293b;display:flex;justify-c
 .target-chip.selected{background:var(--felt-green);color:white;border-color:#064e3b}
 .btn-confirm{width:100%;padding:14px;background:var(--felt-green);color:white;border:none;border-radius:14px;font-weight:900;font-size:1.05rem;cursor:pointer}
 
-/* history */
+/* HISTORY DRAWER */
 .history-drawer{position:fixed;inset:0;background:var(--bg-dark);z-index:2000;transform:translateY(100%);transition:320ms;display:flex;flex-direction:column}
 .history-drawer.open{transform:translateY(0)}
-.hist-top{padding:20px;display:flex;justify-content:space-between;align-items:center;background:var(--felt-green);border-bottom:2px solid var(--gold)}
-.hist-top h3{font-weight:900;color:white;margin:0}
 
-/* Filter Panel */
+.hist-top{
+  padding:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:var(--bg-dark);
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.hist-top h3{ font-weight:900; color:var(--gold); margin:0; font-size: 1.15rem; letter-spacing: 0.5px; }
+
 .hist-filter-area{background:#07121a;padding:12px;display:none;gap:8px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.04)}
 .hist-filter-area.open{display:flex}
 .filter-chip{padding:8px 12px;background:#f1f5f9;border-radius:20px;white-space:nowrap;font-weight:800;border:2px solid transparent;font-size:0.85rem;cursor:pointer;color:#0f172a}
 .filter-chip.selected{background:var(--gold);color:#07121a;border-color:rgba(0,0,0,0.08)}
-.hist-item{background:#1e293b;margin:8px 15px;padding:12px;border-radius:12px;border-right:5px solid var(--gold);display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-.hist-item:hover{transform:translateY(-3px)}
 
-/* UNIFORM DRAWER BUTTONS */
-.drawer-actions {
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.btn-drawer-full {
-  width:100%;
-  padding:15px;
-  background:#334155;
-  border:none;
+/* --- NEW RECEIPT HISTORY DESIGN --- */
+.hist-item{
+  background:#1e293b;
+  margin:8px 15px;
+  padding:14px;
   border-radius:12px;
-  font-weight:800;
-  color:white;
-  font-size: 1rem;
-  font-family: var(--font);
+  border-right:4px solid var(--gold);
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: slideIn 0.3s ease-out;
+}
+@keyframes slideIn { from { opacity: 0; transform:translateY(10px); } to { opacity: 1; transform:translateY(0); } }
+
+.hist-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* New Receipt Text Styles */
+.receipt-text {
+  font-size: 0.95rem;
+  color: #e2e8f0;
+  font-weight: 600;
+  line-height: 1.6;
+  width: 100%;
+}
+.receipt-highlight {
+  color: white;
+  font-weight: 900;
+  border-bottom: 1px dotted rgba(255,255,255,0.4);
+}
+.receipt-amount {
+  color: var(--gold);
+  font-family: monospace;
+  font-weight: 900;
+  font-size: 1.15rem;
+  padding: 0 2px;
+}
+.receipt-from {
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.hist-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 8px;
+}
+
+.hist-meta {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.btn-item-undo {
+  background: rgba(220, 38, 38, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+}
+.btn-item-undo:active { background: rgba(220, 38, 38, 0.3); transform: scale(0.95); }
+
+.drawer-actions { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+.btn-drawer-full {
+  width:100%; padding:15px; background:#334155; border:none; border-radius:12px;
+  font-weight:800; color:white; font-size: 1rem; font-family: var(--font); cursor: pointer; transition: background 0.2s;
 }
 .btn-drawer-full:active { background: #475569; transform: scale(0.98); }
 
-/* confirm modal */
+/* Confirm Modal */
 #confirmModal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;background:rgba(0,0,0,0.6)}
 #confirmModal.open{display:flex}
 #confirmBox{background:white;color:var(--text-dark);padding:18px;border-radius:14px;width:calc(100% - 40px);max-width:420px;text-align:center}
-#confirmBox .msg{font-weight:900;margin-bottom:12px}
+#confirmBox .msg{font-weight:900;margin-bottom:12px; white-space: pre-line;}
 #confirmBox .actions{display:flex;gap:10px;justify-content:center;margin-top:8px}
 .confirm-btn{padding:10px 16px;border-radius:10px;border:none;font-weight:900;cursor:pointer}
 .confirm-yes{background:var(--felt-green);color:white}
@@ -262,7 +255,6 @@ nav{position:fixed;bottom:0;width:100%;background:#1e293b;display:flex;justify-c
 </head>
 <body>
 
-<!-- Minimal header: only the requested text -->
 <header class="site-header" role="banner" aria-label="بانکا مونوپولی">
   <h1>بانکا مونوپولی</h1>
 </header>
@@ -273,7 +265,6 @@ nav{position:fixed;bottom:0;width:100%;background:#1e293b;display:flex;justify-c
 
 <nav>
   <button class="nav-item" onclick="resetGame()" title="نویکرن">
-    <!-- Refresh SVG -->
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 10-2.53 6.02" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v-4h-4" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     نویکرن
   </button>
@@ -281,7 +272,6 @@ nav{position:fixed;bottom:0;width:100%;background:#1e293b;display:flex;justify-c
   <button class="add-circle" onclick="addPlayer()" aria-label="زیادکردن یاریزان">+</button>
 
   <button class="nav-item" onclick="toggleHistory(true)" title="مێژوو">
-    <!-- History SVG -->
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 11-3.06-6.12" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7v6l4 2" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     مێژوو
   </button>
@@ -320,7 +310,6 @@ nav{position:fixed;bottom:0;width:100%;background:#1e293b;display:flex;justify-c
   </div>
 
   <div class="drawer-actions">
-    <button onclick="confirmUndo()" class="btn-drawer-full">زڤراندن</button>
     <button class="btn-drawer-full" onclick="toggleHistFilterPanel()">فیلتەرکرن</button>
   </div>
 
@@ -341,15 +330,12 @@ nav{position:fixed;bottom:0;width:100%;background:#1e293b;display:flex;justify-c
 
 <script>
 /* STORAGE */
-const STORE = 'monopoly_badini_v7_grid';
+const STORE = 'monopoly_badini_receipt_v9';
 
 /* STATE */
 let state = { players: [], history: [], filterPlayers: [] };
 let activeAction = { type:'', fromId:'', toId:'Bank', reason:'' };
 window._confirmCallback = null;
-
-/* NO-OP toast (removed all visible notifications per request) */
-function toast(){ /* intentionally empty: notifications removed */ }
 
 /* Init */
 function init(){
@@ -378,11 +364,11 @@ function renderPlayers(){
   const list = document.getElementById('player-list');
   list.innerHTML = '';
   if(state.players.length === 0){
-    list.style.display = 'block'; // Fallback for message
+    list.style.display = 'block';
     list.innerHTML = '<div style="text-align:center;color:#94a3b8;margin-top:50px;font-weight:800">زێدە بکە (+)</div>';
     return;
   }
-  list.style.display = 'grid'; // Ensure grid is on
+  list.style.display = 'grid';
 
   state.players.forEach(p=>{
     const bankrupt = (p.balance <= 0);
@@ -421,10 +407,9 @@ function escapeHtml(s){
 /* open sheet */
 function openSheet(pid, type){
   const p = state.players.find(x=>x.id===pid);
-  if(!p) return; // toast removed
-  if(p.balance <= 0){
-    return;
-  }
+  if(!p) return;
+  if(p.balance <= 0) return;
+
   activeAction = { type, fromId: pid, toId: 'Bank', reason: '' };
   document.getElementById('amtInp').value = '';
   document.querySelectorAll('.reason-btn').forEach(b=>b.classList.remove('selected'));
@@ -433,7 +418,7 @@ function openSheet(pid, type){
   const targetList = document.getElementById('targetList');
   if(type === 'send'){
     targetSection.style.display = 'block';
-    let html = `<div class="target-chip selected" onclick="selTarget(this,'Bank')">بەنک (Bank)</div>`;
+    let html = `<div class="target-chip selected" onclick="selTarget(this,'Bank')">بانک</div>`;
     state.players.forEach(op => { if(op.id !== pid) html += `<div class="target-chip" onclick="selTarget(this,'${op.id}')">${escapeHtml(op.name)}</div>` });
     targetList.innerHTML = html;
   } else targetSection.style.display = 'none';
@@ -459,21 +444,23 @@ function confirmTrans(){
     const t = state.players.find(p=>p.id===activeAction.toId);
     prevTo = t ? t.balance : null;
   }
+
+  // Clean description for internal use
   let desc = '';
   if(activeAction.type === 'send'){
     player.balance -= amt;
     if(activeAction.toId !== 'Bank'){
       const target = state.players.find(p=>p.id===activeAction.toId);
       if(target) target.balance += amt;
-      desc = `${player.name} ➡️ ${target ? target.name : 'Bank'}`;
+      desc = `${player.name} -> ${target ? target.name : 'Bank'}`;
       animateCoin(player.id, activeAction.toId);
     } else {
-      desc = `${player.name} ➡️ Bank`;
+      desc = `${player.name} -> Bank`;
       animateCoin(player.id,'Bank');
     }
   } else {
     player.balance += amt;
-    desc = `Bank ➡️ ${player.name}`;
+    desc = `Bank -> ${player.name}`;
     animateCoin('Bank', player.id);
   }
 
@@ -549,6 +536,14 @@ function toggleFilterForPlayer(pid){
   else state.filterPlayers.splice(i,1);
   save();
 }
+
+function getPlayerName(id){
+  if(id==='Bank') return 'بانک';
+  const p = state.players.find(x=>x.id===id);
+  return p ? p.name : 'Unknown';
+}
+
+/* --- UPDATED HISTORY RENDERER (KURDISH BADINI GRAMMAR) --- */
 function renderHistoryContent(){
   const cont = document.getElementById('histContent');
   if(!cont) return;
@@ -562,15 +557,92 @@ function renderHistoryContent(){
     cont.innerHTML = `<div style="text-align:center;color:#94a3b8;margin-top:40px;font-weight:800">هیچ مێژوویەک نینە</div>`;
     return;
   }
-  cont.innerHTML = shown.map((h, idx)=>`
-    <div class="hist-item" onclick="selectHistory(${idx})">
-      <div style="overflow:hidden;min-width:0">
-        <div style="font-weight:900;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(h.desc)}</div>
-        <div style="font-size:0.75rem;color:#94a3b8">${escapeHtml(h.reason)} | ${new Date(h.time).toLocaleTimeString()}</div>
+
+  cont.innerHTML = shown.map((h, idx) => {
+    const r = h.raw || {};
+
+    // Determine raw names
+    let rawFromName = (r.fromId === 'Bank') ? 'بانک' : getPlayerName(r.fromId);
+    let rawToName = (r.toId === 'Bank') ? 'بانک' : getPlayerName(r.toId);
+    let displayTo, displayFrom;
+
+    // --- Grammar Logic: Bankê vs Player-i ---
+
+    // Receiver formatting
+    if(r.toId === 'Bank') {
+        displayTo = 'بانکێ'; // Bank takes 'ê'
+    } else {
+        displayTo = rawToName + 'ی'; // Player takes 'i' (displayed as 'ی')
+    }
+
+    // Sender formatting
+    if(r.fromId === 'Bank') {
+        displayFrom = 'بانکێ';
+    } else {
+        // As per user request: "ژ (یاریزان)ی" - adding 'ی' to sender as well
+        displayFrom = rawFromName + 'ی';
+    }
+
+    // Determine IDs for constructing names
+    if(r.type === 'send'){
+        // Logic already handled above by using r.fromId/r.toId directly
+    } else {
+        // Logic handled: Type 'get' means Bank -> Player, so r.fromId is Player, r.toId is Bank? 
+        // No, 'get' in this app logic means: Player (fromId) gets money FROM Bank.
+        // Wait, let's check confirmTrans logic:
+        // if type == 'send': Player(from) -> Target(to).
+        // if type == 'get': Player(from) receives FROM Bank.
+
+        // Re-mapping for the Sentence Logic:
+        // We need: Receiver(Subject) ... From ... Sender(Object)
+
+        if(r.type === 'get') {
+            // Receiver is the Player (activeAction.fromId)
+            // Sender is Bank
+            rawToName = getPlayerName(r.fromId);
+            rawFromName = 'بانک';
+
+            displayTo = rawToName + 'ی';
+            displayFrom = 'بانکێ';
+        } 
+        // If type == 'send'
+        else {
+            if(r.toId === 'Bank'){
+                // Receiver is Bank
+                // Sender is Player (r.fromId)
+                displayTo = 'بانکێ';
+                displayFrom = getPlayerName(r.fromId) + 'ی';
+            } else {
+                // Receiver is Player (r.toId)
+                // Sender is Player (r.fromId)
+                displayTo = getPlayerName(r.toId) + 'ی';
+                displayFrom = getPlayerName(r.fromId) + 'ی';
+            }
+        }
+    }
+
+    const amountStr = Number(h.amt).toLocaleString();
+
+    // Template: [Receiver] [Amount] ž [Sender] wergirtin
+    return `
+    <div class="hist-item">
+      <div class="hist-header">
+        <div class="receipt-text">
+            <span class="receipt-highlight">${escapeHtml(displayTo)}</span>
+            <span class="receipt-amount">$${amountStr}</span>
+            ژ
+            <span class="receipt-from">${escapeHtml(displayFrom)}</span>
+          وەرگرتن
+        </div>
       </div>
-      <div style="color:var(--gold);font-weight:900;font-size:1.1rem">$${Number(h.amt).toLocaleString()}</div>
+      <div class="hist-details">
+         <div class="hist-meta">
+            ${escapeHtml(h.reason)} • ${new Date(h.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+         </div>
+         <button class="btn-item-undo" onclick="selectHistory(${idx})">زڤراندن</button>
+      </div>
     </div>
-  `).join('');
+  `}).join('');
 }
 
 /* confirm modal */
@@ -584,12 +656,6 @@ function closeConfirm(){ const modal = document.getElementById('confirmModal'); 
 function confirmYes(){ if(typeof window._confirmCallback === 'function'){ try{ window._confirmCallback(); }catch(e){console.error(e)} } closeConfirm(); }
 function confirmNo(){ closeConfirm(); }
 
-function confirmUndo(){
-  if(state.history.length === 0) return;
-  const last = state.history[0];
-  const msg = `پشتراستی!\n\n${last.desc} — $${Number(last.amt).toLocaleString()}`;
-  showConfirm(msg, ()=>{ undoAtIndex(0); toggleHistory(true); });
-}
 function selectHistory(idx){
   const filter = state.filterPlayers || [];
   const hist = state.history || [];
@@ -601,9 +667,32 @@ function selectHistory(idx){
   const h = shown[idx];
   const actualIndex = state.history.indexOf(h);
   if(actualIndex === -1) return;
-  const msg = `پشتراستی!\n\n${h.desc} — $${Number(h.amt).toLocaleString()}`;
+
+  // Re-calculate strings for the modal question
+  let displayTo, displayFrom;
+  const r = h.raw;
+
+  if(r.type === 'get') {
+     // Bank -> Player
+     displayTo = getPlayerName(r.fromId) + 'ی';
+     displayFrom = 'بانکێ';
+  } else {
+     // Player -> Bank OR Player -> Player
+     if(r.toId === 'Bank') {
+         displayTo = 'بانکێ';
+         displayFrom = getPlayerName(r.fromId) + 'ی';
+     } else {
+         displayTo = getPlayerName(r.toId) + 'ی';
+         displayFrom = getPlayerName(r.fromId) + 'ی';
+     }
+  }
+
+  // Construct confirm message in Badini
+  const msg = `زڤراندنا\n ${displayTo} $${Number(h.amt).toLocaleString()} ژ ${displayFrom} وەرگرتن؟`;
+
   showConfirm(msg, ()=>{ undoAtIndex(actualIndex); toggleHistory(true); });
 }
+
 function undoAtIndex(idx){
   if(state.history.length===0) return;
   if(idx<0||idx>=state.history.length) return;
@@ -622,6 +711,7 @@ function undoAtIndex(idx){
       if(receiver) receiver.balance -= amt;
     }
   } else {
+    // Type 'get' (Bank -> Player), undo implies taking money back from player
     const player = state.players.find(p=>p.id===fromId);
     if(player) player.balance -= amt;
   }
@@ -633,7 +723,7 @@ function undoAtIndex(idx){
 function renamePlayer(id){
   const p = state.players.find(x=>x.id===id);
   if(!p) return;
-  const newName = prompt('ناڤی نوێ بنڤیسە:', p.name);
+  const newName = prompt('ناڤی نوێ بنڤیسە', p.name);
   if(!newName) return;
   p.name = newName;
   save();
