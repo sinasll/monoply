@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#064e3b">
+<title>مۆنۆپۆلی</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg-dark:#0f172a; --felt-green:#064e3b; --gold:#d4af37;
+  --card-bg:#ffffff; --text-dark:#1e293b; --danger:#e11d48;
+  --success:#10b981; --font:'Noto Sans Arabic',sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;outline:none}
+body{background:var(--bg-dark);font-family:var(--font);height:100vh;display:flex;flex-direction:column;overflow:hidden;color:white}
+
+/* simple header (only the requested text) */
+.site-header{
+  padding:14px 12px;
+  padding-top: max(14px, env(safe-area-inset-top));
+  text-align:center;
+  background: transparent;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.site-header h1{
+  margin:0;
+  font-weight:900;
+  font-size:1.15rem;
+  color:var(--gold);
+  letter-spacing:0.6px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+
+/* main */
+main{flex:1;padding:15px;padding-bottom:100px;background:radial-gradient(circle at center,#14532d 0%,#0f172a 100%)}
+
+/* --- NEW GRID SYSTEM --- */
+.player-list{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr); /* Mobile: 2 per row */
+  gap:10px;
+  max-width:1200px;
+  margin:0 auto;
+  max-height: calc(100vh - 220px);
+  height: auto;
+  overflow-y:auto;
+  -webkit-overflow-scrolling: touch; /* smooth on iOS */
+  -ms-overflow-style: auto; /* IE/Edge */
+  scrollbar-gutter: stable;
+  padding-right:4px;
+  padding-left:4px;
+}
+
+/* Scrollbar styles for modern browsers */
+.player-list::-webkit-scrollbar{ width:10px; height:10px }
+.player-list::-webkit-scrollbar-thumb{ background: linear-gradient(#334155,#0b1220); border-radius:8px }
+.player-list{ scrollbar-width: thin; scrollbar-color: #334155 transparent }
+
+/* Responsive Breakpoints for Grid */
+@media(min-width: 600px){
+  .player-list{ grid-template-columns: repeat(3, 1fr); max-height: calc(100vh - 230px); }
+}
+@media(min-width: 900px){
+  .player-list{ grid-template-columns: repeat(6, 1fr); max-height: calc(100vh - 240px); }
+}
+
+/* card - Redesigned for Grid */
+.player-card{
+  background:var(--card-bg);
+  border-radius:12px;
+  display:flex;
+  flex-direction: column; /* Vertical stack */
+  align-items:center;
+  justify-content: space-between;
+  padding:15px 10px;
+  position:relative;
+  box-shadow:0 6px 18px rgba(2,6,23,0.45);
+  border-bottom:6px solid var(--gold); /* Border at bottom now */
+  border-right: none;
+  transition:transform 200ms ease, filter 200ms;
+  overflow:hidden;
+  height: 100%;
+  min-height: 160px;
+}
+
+/* --- BANKRUPT STYLES --- */
+.player-card.bankrupt {
+  filter: grayscale(100%) contrast(120%);
+  opacity: 0.8;
+  pointer-events: none;
+  background: #cbd5e1;
+  border-color: #475569;
+}
+
+.bankrupt-lock {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0, 0, 0, 0.05),
+    rgba(0, 0, 0, 0.05) 10px,
+    rgba(0, 0, 0, 0.15) 10px,
+    rgba(0, 0, 0, 0.15) 20px
+  );
+  z-index: 5;
+  pointer-events: none;
+}
+
+.bankrupt-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-15deg);
+  border: 4px solid var(--danger);
+  color: var(--danger);
+  font-size: 1.2rem;
+  font-weight: 900;
+  padding: 4px 12px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.bankrupt-anim .bankrupt-badge { animation: stamp-slam 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.bankrupt-anim { animation: shake-death 0.5s ease-in-out forwards; }
+@keyframes stamp-slam { 0% { transform: translate(-50%, -50%) scale(3) rotate(0deg); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1) rotate(-15deg); opacity: 1; } }
+@keyframes shake-death { 0% { transform: translateX(0); } 25% { transform: translateX(-6px) rotate(-1deg); } 50% { transform: translateX(6px) rotate(1deg); } 75% { transform: translateX(-4px); } 100% { transform: translateX(0); filter: grayscale(100%); } }
+
+/* info */
+.player-info{
+  flex:1;
+  min-width:0;
+  padding-left:0;
+  text-align: center;
+  margin-bottom: 10px;
+  width: 100%;
+}
+.player-name{color:var(--text-dark);font-weight:800;font-size:1rem;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-balance{color:#334155;font-family:monospace;font-weight:900;font-size:1.4rem;letter-spacing:-0.5px}
+
+/* --- COMPACT BUTTONS GRID --- */
+.card-actions{
+  display:flex;
+  flex-wrap: wrap;
+  gap:6px;
+  width: 100%;
+  justify-content:center;
+  margin-right: 0;
+}
+
+.btn-act {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 0;
+  width: 48%;
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 100ms;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.btn-send{background:#fee2e2;color:#be123c;}
+.btn-get{background:#dcfce7;color:#15803d;}
+.btn-act:active{transform:scale(0.95)}
+
+.icon-row {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+.icon-btn{background:transparent;border:none;padding:0;border-radius:6px;cursor:pointer;color:#94a3b8;display:inline-flex;align-items:center;justify-content:center; width:32px;height:32px; transition:background 0.2s}
+.icon-btn:hover{background:rgba(0,0,0,0.06); color:var(--text-dark)}
+.icon-btn svg{width:18px;height:18px;display:block}
+
+/* money dots (kept) */
+.money-burst{position:fixed;width:10px;height:10px;border-radius:50%;background:rgba(212,175,55,0.95);pointer-events:none;z-index:6000;will-change:transform,opacity}
+
+/* nav */
+nav{position:fixed;bottom:0;width:100%;background:#1e293b;display:flex;justify-content:space-around;align-items:center;padding:10px 0;padding-bottom:max(10px,env(safe-area-inset-bottom));border-top:1px solid #334155;z-index:100}
+.nav-item{background:none;border:none;color:#94a3b8;font-family:var(--font);font-size:0.8rem;display:flex;gap:6px;flex-direction:column;align-items:center}
+.add-circle{width:56px;height:56px;background:var(--gold);border-radius:50%;display:grid;place-items:center;font-size:28px;color:black;border:4px solid #1e293b;transform:translateY(-20px);box-shadow:0 6px 20px rgba(0,0,0,0.45)}
+
+/* sheet */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:280ms;z-index:1000;backdrop-filter:blur(2px)}
+.overlay.open{opacity:1;pointer-events:auto}
+.sheet{background:white;width:100%;max-width:500px;margin:0 auto;border-radius:24px 24px 0 0;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom));transform:translateY(100%);transition:320ms cubic-bezier(.17,.84,.44,1);color:var(--text-dark)}
+.overlay.open .sheet{transform:translateY(0)}
+.sheet-title{font-weight:900;margin-bottom:12px;text-align:center;color:#000;font-size:1.05rem}
+.inp-amt{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:12px;font-size:1.6rem;text-align:center;font-weight:900;margin-bottom:12px;font-family:monospace}
+
+/* reasons/chips */
+.reason-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.reason-btn{background:#f1f5f9;padding:10px;border-radius:10px;text-align:center;font-size:0.8rem;font-weight:800;border:2px solid transparent;cursor:pointer}
+.reason-btn.selected{background:#fef3c7;border-color:var(--gold);color:#92400e}
+.target-scroll{display:flex;gap:10px;overflow-x:auto;padding:5px 0 16px 0;-webkit-overflow-scrolling:touch}
+.target-chip{padding:10px 14px;background:#f1f5f9;border-radius:20px;white-space:nowrap;font-weight:800;border:2px solid transparent;font-size:0.85rem;cursor:pointer}
+.target-chip.selected{background:var(--felt-green);color:white;border-color:#064e3b}
+.btn-confirm{width:100%;padding:14px;background:var(--felt-green);color:white;border:none;border-radius:14px;font-weight:900;font-size:1.05rem;cursor:pointer}
+
+/* history */
+.history-drawer{position:fixed;inset:0;background:var(--bg-dark);z-index:2000;transform:translateY(100%);transition:320ms;display:flex;flex-direction:column}
+.history-drawer.open{transform:translateY(0)}
+.hist-top{padding:20px;display:flex;justify-content:space-between;align-items:center;background:var(--felt-green);border-bottom:2px solid var(--gold)}
+.hist-top h3{font-weight:900;color:white;margin:0}
+
+/* Filter Panel */
+.hist-filter-area{background:#07121a;padding:12px;display:none;gap:8px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.04)}
+.hist-filter-area.open{display:flex}
+.filter-chip{padding:8px 12px;background:#f1f5f9;border-radius:20px;white-space:nowrap;font-weight:800;border:2px solid transparent;font-size:0.85rem;cursor:pointer;color:#0f172a}
+.filter-chip.selected{background:var(--gold);color:#07121a;border-color:rgba(0,0,0,0.08)}
+.hist-item{background:#1e293b;margin:8px 15px;padding:12px;border-radius:12px;border-right:5px solid var(--gold);display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.hist-item:hover{transform:translateY(-3px)}
+
+/* UNIFORM DRAWER BUTTONS */
+.drawer-actions {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.btn-drawer-full {
+  width:100%;
+  padding:15px;
+  background:#334155;
+  border:none;
+  border-radius:12px;
+  font-weight:800;
+  color:white;
+  font-size: 1rem;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-drawer-full:active { background: #475569; transform: scale(0.98); }
+
+/* confirm modal */
+#confirmModal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:4000;background:rgba(0,0,0,0.6)}
+#confirmModal.open{display:flex}
+#confirmBox{background:white;color:var(--text-dark);padding:18px;border-radius:14px;width:calc(100% - 40px);max-width:420px;text-align:center}
+#confirmBox .msg{font-weight:900;margin-bottom:12px}
+#confirmBox .actions{display:flex;gap:10px;justify-content:center;margin-top:8px}
+.confirm-btn{padding:10px 16px;border-radius:10px;border:none;font-weight:900;cursor:pointer}
+.confirm-yes{background:var(--felt-green);color:white}
+.confirm-no{background:#f1f5f9;color:#475569}
+
+@media(min-width:600px){main{padding:24px}}
+</style>
+</head>
+<body>
+
+<!-- Minimal header: only the requested text -->
+<header class="site-header" role="banner" aria-label="بانکا مونوپولی">
+  <h1>بانکا مونوپولی</h1>
+</header>
+
+<main>
+  <div id="player-list" class="player-list"></div>
+</main>
+
+<nav>
+  <button class="nav-item" onclick="resetGame()" title="نویکرن">
+    <!-- Refresh SVG -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 10-2.53 6.02" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12v-4h-4" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    نویکرن
+  </button>
+
+  <button class="add-circle" onclick="addPlayer()" aria-label="زیادکردن یاریزان">+</button>
+
+  <button class="nav-item" onclick="toggleHistory(true)" title="مێژوو">
+    <!-- History SVG -->
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="display:block" xmlns="http://www.w3.org/2000/svg"><path d="M21 12a9 9 0 11-3.06-6.12" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7v6l4 2" stroke="#94a3b8" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    مێژوو
+  </button>
+</nav>
+
+<div id="transOverlay" class="overlay">
+  <div class="sheet">
+    <div id="sheetTitle" class="sheet-title">فرێکرنا پارەی</div>
+    <input type="number" id="amtInp" class="inp-amt" placeholder="0" inputmode="numeric">
+    <p style="font-size:0.85rem;margin-bottom:8px;font-weight:900;color:#64748b">ئەگەر</p>
+    <div class="reason-grid">
+      <div class="reason-btn" onclick="selReason(this,'Krrin')">کڕین</div>
+      <div class="reason-btn" onclick="selReason(this,'Krê')">کرێ</div>
+      <div class="reason-btn" onclick="selReason(this,'Baj')">باج</div>
+      <div class="reason-btn" onclick="selReason(this,'Bazrgani')">بازرگانی</div>
+      <div class="reason-btn" onclick="selReason(this,'Mûçe')">مووچە</div>
+      <div class="reason-btn" onclick="selReason(this,'Xêr')">دیاری</div>
+    </div>
+
+    <div id="targetSection">
+      <p style="font-size:0.85rem;margin-bottom:8px;font-weight:900;color:#64748b">بو کێ؟</p>
+      <div id="targetList" class="target-scroll"></div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button class="btn-confirm" style="background:#f1f5f9;color:#475569;width:35%" onclick="closeSheet()">زڤرین</button>
+      <button class="btn-confirm" onclick="confirmTrans()">پشتڕاستکرن</button>
+    </div>
+  </div>
+</div>
+
+<div id="histDrawer" class="history-drawer">
+  <div class="hist-top">
+    <h3>مێژوو</h3>
+    <button onclick="toggleHistory(false)" style="background:none;border:none;color:white;font-size:1.6rem">✕</button>
+  </div>
+
+  <div class="drawer-actions">
+    <button onclick="confirmUndo()" class="btn-drawer-full">زڤراندن</button>
+    <button class="btn-drawer-full" onclick="toggleHistFilterPanel()">فیلتەرکرن</button>
+  </div>
+
+  <div id="histFilterPanel" class="hist-filter-area"></div>
+
+  <div id="histContent" style="overflow-y:auto;flex:1"></div>
+</div>
+
+<div id="confirmModal">
+  <div id="confirmBox">
+    <div class="msg" id="confirmMsg">پشتراستی؟</div>
+    <div class="actions">
+      <button class="confirm-btn confirm-no" onclick="confirmNo()">نەخێر</button>
+      <button class="confirm-btn confirm-yes" onclick="confirmYes()">بەڵێ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* STORAGE */
+const STORE = 'monopoly_badini_v7_grid';
+
+/* STATE */
+let state = { players: [], history: [], filterPlayers: [] };
+let activeAction = { type:'', fromId:'', toId:'Bank', reason:'' };
+window._confirmCallback = null;
+
+/* NO-OP toast (removed all visible notifications per request) */
+function toast(){ /* intentionally empty: notifications removed */ }
+
+/* Init */
+function init(){
+  const data = localStorage.getItem(STORE);
+  if(data){
+    try{ const parsed = JSON.parse(data); state = Object.assign(state, parsed); } catch(e){ state = { players:[], history:[], filterPlayers:[] }; }
+  }
+  render();
+}
+
+/* Save */
+function save(){
+  localStorage.setItem(STORE, JSON.stringify(state));
+  render();
+  setTimeout(checkAllBankruptcyUI, 50);
+}
+
+/* Render */
+function render(){
+  renderPlayers();
+  renderHistoryContent();
+}
+
+/* Players rendering */
+function renderPlayers(){
+  const list = document.getElementById('player-list');
+  list.innerHTML = '';
+  if(state.players.length === 0){
+    list.style.display = 'block'; // Fallback for message
+    list.innerHTML = '<div style="text-align:center;color:#94a3b8;margin-top:50px;font-weight:800">زێدە بکە (+)</div>';
+    return;
+  }
+  list.style.display = 'grid'; // Ensure grid is on
+
+  state.players.forEach(p=>{
+    const bankrupt = (p.balance <= 0);
+    const actionsHtml = bankrupt ? '' : `
+      <div class="card-actions">
+        <button class="btn-act btn-get" onclick="openSheet('${p.id}','get')">وەردگریت</button>
+        <button class="btn-act btn-send" onclick="openSheet('${p.id}','send')">فرێکرن</button>
+        <div class="icon-row">
+            <button class="icon-btn" title="گۆڕین" onclick="renamePlayer('${p.id}')">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" fill="currentColor"/><path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/></svg>
+            </button>
+            <button class="icon-btn" title="سڕینەوە" onclick="confirmDelete('${p.id}')">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 7h12v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V7z" fill="currentColor"/><path d="M9 4h6l1 2H8l1-2z" fill="currentColor"/></svg>
+            </button>
+        </div>
+      </div>
+    `;
+    list.innerHTML += `
+      <div class="player-card ${bankrupt ? 'bankrupt' : ''}" id="card-${p.id}">
+        ${bankrupt ? '<div class="bankrupt-badge">ئیفلاس</div><div class="bankrupt-lock"></div>' : ''}
+        <div class="player-info">
+          <div class="player-name">${escapeHtml(p.name)}</div>
+          <div class="player-balance">$${Number(p.balance).toLocaleString()}</div>
+        </div>
+        ${actionsHtml}
+      </div>
+    `;
+  });
+}
+
+function escapeHtml(s){
+  if(!s && s !== 0) return '';
+  return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+}
+
+/* open sheet */
+function openSheet(pid, type){
+  const p = state.players.find(x=>x.id===pid);
+  if(!p) return; // toast removed
+  if(p.balance <= 0){
+    return;
+  }
+  activeAction = { type, fromId: pid, toId: 'Bank', reason: '' };
+  document.getElementById('amtInp').value = '';
+  document.querySelectorAll('.reason-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('sheetTitle').innerText = (type==='send' ? 'فرێکرن ژ: ' : 'وەردگریت بو: ') + p.name;
+  const targetSection = document.getElementById('targetSection');
+  const targetList = document.getElementById('targetList');
+  if(type === 'send'){
+    targetSection.style.display = 'block';
+    let html = `<div class="target-chip selected" onclick="selTarget(this,'Bank')">بەنک (Bank)</div>`;
+    state.players.forEach(op => { if(op.id !== pid) html += `<div class="target-chip" onclick="selTarget(this,'${op.id}')">${escapeHtml(op.name)}</div>` });
+    targetList.innerHTML = html;
+  } else targetSection.style.display = 'none';
+  document.getElementById('transOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('amtInp').focus(),150);
+}
+function closeSheet(){ document.getElementById('transOverlay').classList.remove('open'); }
+function selReason(el,r){ document.querySelectorAll('.reason-btn').forEach(b=>b.classList.remove('selected')); el.classList.add('selected'); activeAction.reason = r; }
+function selTarget(el,id){ document.querySelectorAll('.target-chip').forEach(c=>c.classList.remove('selected')); el.classList.add('selected'); activeAction.toId = id; }
+
+/* confirm transaction */
+function confirmTrans(){
+  const amtRaw = document.getElementById('amtInp').value;
+  const amt = parseInt(amtRaw);
+  if(!amt || amt <= 0) return;
+  if(!activeAction.reason) return;
+  const player = state.players.find(p=>p.id===activeAction.fromId);
+  if(!player) return;
+
+  const prevFrom = player.balance;
+  let prevTo = null;
+  if(activeAction.type === 'send' && activeAction.toId !== 'Bank'){
+    const t = state.players.find(p=>p.id===activeAction.toId);
+    prevTo = t ? t.balance : null;
+  }
+  let desc = '';
+  if(activeAction.type === 'send'){
+    player.balance -= amt;
+    if(activeAction.toId !== 'Bank'){
+      const target = state.players.find(p=>p.id===activeAction.toId);
+      if(target) target.balance += amt;
+      desc = `${player.name} ➡️ ${target ? target.name : 'Bank'}`;
+      animateCoin(player.id, activeAction.toId);
+    } else {
+      desc = `${player.name} ➡️ Bank`;
+      animateCoin(player.id,'Bank');
+    }
+  } else {
+    player.balance += amt;
+    desc = `Bank ➡️ ${player.name}`;
+    animateCoin('Bank', player.id);
+  }
+
+  const KurdishReasons = { 'Krrin':'کڕین','Krê':'کرێ','Baj':'باج','Bazrgani':'بازرگانی','Mûçe':'مووچە','Xêr':'دیاری' };
+  state.history.unshift({ time: Date.now(), desc, amt, reason: KurdishReasons[activeAction.reason] || activeAction.reason, raw: {...activeAction, amt} });
+  save();
+  closeSheet();
+
+  handleBankruptcyTransition(activeAction.fromId, prevFrom, state.players.find(p=>p.id===activeAction.fromId).balance);
+  if(activeAction.type === 'send' && activeAction.toId !== 'Bank'){
+    handleBankruptcyTransition(activeAction.toId, prevTo, state.players.find(p=>p.id===activeAction.toId).balance);
+  }
+}
+
+function addPlayer(){
+  const n = prompt("ناڤێ یاریزانی بنڤیسە (Name):");
+  if(!n) return;
+  state.players.push({ id: 'p'+Date.now(), name: n, balance: 1500 });
+  save();
+}
+
+function resetGame(){
+  if(confirm('هەمی داتایان ژێبەی؟')){
+    state = { players: [], history: [], filterPlayers: [] };
+    save();
+  }
+}
+
+/* history drawer control */
+function toggleHistory(show){
+  const drawer = document.getElementById('histDrawer');
+  if(show){
+    drawer.classList.add('open');
+    renderHistoryContent();
+    buildFilterPanel();
+  } else {
+    drawer.classList.remove('open');
+  }
+}
+function toggleHistFilterPanel(){
+  const panel = document.getElementById('histFilterPanel');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open')) buildFilterPanel();
+}
+function buildFilterPanel(){
+  const panel = document.getElementById('histFilterPanel');
+  if(!panel) return;
+  if(state.players.length === 0){
+    panel.innerHTML = '<div style="color:#94a3b8">چ یاریزان بەژدار نینن</div>';
+    return;
+  }
+  panel.innerHTML = '';
+  state.players.forEach(p=>{
+    const sel = (state.filterPlayers || []).includes(p.id) ? 'selected' : '';
+    const chip = document.createElement('button');
+    chip.className = 'filter-chip ' + sel;
+    chip.innerText = p.name;
+    chip.onclick = () => { toggleFilterForPlayer(p.id); renderHistoryContent(); buildFilterPanel(); };
+    panel.appendChild(chip);
+  });
+  const clearBtn = document.createElement('button');
+  clearBtn.className = 'filter-chip';
+  clearBtn.style.background = '#334155';
+  clearBtn.style.color = 'white';
+  clearBtn.innerText = 'پاککردن';
+  clearBtn.onclick = () => { state.filterPlayers = []; save(); buildFilterPanel(); renderHistoryContent(); };
+  panel.appendChild(clearBtn);
+}
+function toggleFilterForPlayer(pid){
+  state.filterPlayers = state.filterPlayers || [];
+  const i = state.filterPlayers.indexOf(pid);
+  if(i === -1) state.filterPlayers.push(pid);
+  else state.filterPlayers.splice(i,1);
+  save();
+}
+function renderHistoryContent(){
+  const cont = document.getElementById('histContent');
+  if(!cont) return;
+  const hist = state.history || [];
+  const filter = state.filterPlayers || [];
+  const shown = (filter.length === 0) ? hist : hist.filter(h => {
+    const r = h.raw || {};
+    return filter.includes(r.fromId) || filter.includes(r.toId);
+  });
+  if(shown.length === 0){
+    cont.innerHTML = `<div style="text-align:center;color:#94a3b8;margin-top:40px;font-weight:800">هیچ مێژوویەک نینە</div>`;
+    return;
+  }
+  cont.innerHTML = shown.map((h, idx)=>`
+    <div class="hist-item" onclick="selectHistory(${idx})">
+      <div style="overflow:hidden;min-width:0">
+        <div style="font-weight:900;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(h.desc)}</div>
+        <div style="font-size:0.75rem;color:#94a3b8">${escapeHtml(h.reason)} | ${new Date(h.time).toLocaleTimeString()}</div>
+      </div>
+      <div style="color:var(--gold);font-weight:900;font-size:1.1rem">$${Number(h.amt).toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+/* confirm modal */
+function showConfirm(message, cb){
+  const modal = document.getElementById('confirmModal');
+  document.getElementById('confirmMsg').innerText = message;
+  window._confirmCallback = cb;
+  modal.classList.add('open');
+}
+function closeConfirm(){ const modal = document.getElementById('confirmModal'); modal.classList.remove('open'); window._confirmCallback = null; }
+function confirmYes(){ if(typeof window._confirmCallback === 'function'){ try{ window._confirmCallback(); }catch(e){console.error(e)} } closeConfirm(); }
+function confirmNo(){ closeConfirm(); }
+
+function confirmUndo(){
+  if(state.history.length === 0) return;
+  const last = state.history[0];
+  const msg = `پشتراستی!\n\n${last.desc} — $${Number(last.amt).toLocaleString()}`;
+  showConfirm(msg, ()=>{ undoAtIndex(0); toggleHistory(true); });
+}
+function selectHistory(idx){
+  const filter = state.filterPlayers || [];
+  const hist = state.history || [];
+  const shown = (filter.length === 0) ? hist : hist.filter(h => {
+    const r = h.raw || {};
+    return filter.includes(r.fromId) || filter.includes(r.toId);
+  });
+  if(idx<0||idx>=shown.length) return;
+  const h = shown[idx];
+  const actualIndex = state.history.indexOf(h);
+  if(actualIndex === -1) return;
+  const msg = `پشتراستی!\n\n${h.desc} — $${Number(h.amt).toLocaleString()}`;
+  showConfirm(msg, ()=>{ undoAtIndex(actualIndex); toggleHistory(true); });
+}
+function undoAtIndex(idx){
+  if(state.history.length===0) return;
+  if(idx<0||idx>=state.history.length) return;
+  const entry = state.history.splice(idx,1)[0];
+  const { fromId, toId, type, amt } = entry.raw;
+  const fromPlayer = state.players.find(p=>p.id===fromId);
+  const toPlayer = (toId!=='Bank') ? state.players.find(p=>p.id===toId) : null;
+  const prevFrom = fromPlayer ? fromPlayer.balance : null;
+  const prevTo = toPlayer ? toPlayer.balance : null;
+
+  if(type === 'send'){
+    const sender = state.players.find(p=>p.id===fromId);
+    if(sender) sender.balance += amt;
+    if(toId !== 'Bank'){
+      const receiver = state.players.find(p=>p.id===toId);
+      if(receiver) receiver.balance -= amt;
+    }
+  } else {
+    const player = state.players.find(p=>p.id===fromId);
+    if(player) player.balance -= amt;
+  }
+  save();
+  if(fromPlayer) handleBankruptcyTransition(fromId, prevFrom, state.players.find(p=>p.id===fromId)?.balance);
+  if(toPlayer) handleBankruptcyTransition(toId, prevTo, state.players.find(p=>p.id===toId)?.balance);
+}
+
+function renamePlayer(id){
+  const p = state.players.find(x=>x.id===id);
+  if(!p) return;
+  const newName = prompt('ناڤی نوێ بنڤیسە:', p.name);
+  if(!newName) return;
+  p.name = newName;
+  save();
+}
+
+function confirmDelete(id){
+  const p = state.players.find(x=>x.id===id);
+  if(!p) return;
+  showConfirm(`پشتراستی تە دڤێت   ${p.name} ژێببەی؟`, ()=>{ deletePlayer(id); });
+}
+function deletePlayer(id){
+  const p = state.players.find(x=>x.id===id);
+  if(!p) return;
+  state.players = state.players.filter(x=>x.id !== id);
+  state.history = state.history.filter(h => { const r = h.raw || {}; return r.fromId !== id && r.toId !== id; });
+  state.filterPlayers = (state.filterPlayers || []).filter(x => x !== id);
+  save();
+}
+
+function animateCoin(fromId, toId){
+  let sR,eR;
+  if(fromId==='Bank') sR={left:window.innerWidth/2,top:-50,width:0,height:0};
+  else { const el=document.getElementById('card-'+fromId); if(el) sR = el.getBoundingClientRect(); }
+  if(toId==='Bank') eR={left:window.innerWidth/2,top:-50,width:0,height:0};
+  else { const el=document.getElementById('card-'+toId); if(el) eR = el.getBoundingClientRect(); }
+  if(!sR||!eR) return;
+  const c = document.createElement('div'); c.className='fly-coin'; c.innerText='💸';
+  c.style.position='fixed'; c.style.left=(sR.left + (sR.width||0)/2)+'px'; c.style.top=(sR.top + (sR.height||0)/2)+'px';
+  c.style.transition='transform 800ms cubic-bezier(.1,.7,.1,1), opacity 800ms'; document.body.appendChild(c);
+  requestAnimationFrame(()=>{ c.style.transform = `translate(${(eR.left + (eR.width||0)/2) - (sR.left + (sR.width||0)/2)}px, ${(eR.top + (eR.height||0)/2) - (sR.top + (sR.height||0)/2)}px) scale(0.45)`; c.style.opacity='0'; });
+  setTimeout(()=>c.remove(),820);
+}
+
+function handleBankruptcyTransition(playerId, prevBalance, newBalance){
+  const card = document.getElementById('card-'+playerId); if(!card) return;
+  if((prevBalance===undefined || prevBalance>0) && newBalance <= 0){
+    card.classList.add('bankrupt-anim');
+    setTimeout(()=>card.classList.remove('bankrupt-anim'), 600);
+  }
+}
+
+function checkAllBankruptcyUI(){
+  state.players.forEach(p=>{
+    const card = document.getElementById('card-'+p.id); if(!card) return;
+    if(p.balance <= 0){
+      card.classList.add('bankrupt');
+      if(!card.querySelector('.bankrupt-badge')){ const b=document.createElement('div'); b.className='bankrupt-badge'; b.innerText='ئیفلاس'; card.appendChild(b); }
+      if(!card.querySelector('.bankrupt-lock')){ const l=document.createElement('div'); l.className='bankrupt-lock'; card.appendChild(l); }
+      const actions = card.querySelector('.card-actions'); if(actions) actions.remove();
+    } else {
+      card.classList.remove('bankrupt');
+      const b = card.querySelector('.bankrupt-badge'); if(b) b.remove();
+      const l = card.querySelector('.bankrupt-lock'); if(l) l.remove();
+    }
+  });
+}
+
+init();
+</script>
+</body>
+</html>
